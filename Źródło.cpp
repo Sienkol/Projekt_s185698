@@ -89,11 +89,64 @@ void myDelay(int opoznienie)
 
 	}
 
+class gracz
+{
+private:
+	sf::Vector2f position;
+	sf::CircleShape ball;
+	sf::RenderWindow* win;
+	sf::Vector2f okno;
+public:
+	gracz(float x, float y, sf::RenderWindow* win);
+	void steruj();
+	sf::CircleShape getGracz() { return ball; }
+	sf::FloatRect getGraczBounds() { return ball.getGlobalBounds(); }
+};
+
+gracz::gracz(float x, float y, sf::RenderWindow* w)
+{
+	win = w;
+	okno.x = win->getSize().x;
+	okno.y = win->getSize().y;
+	position.x = x;
+	position.y = y;
+	ball.setRadius(30);
+	ball.setFillColor(sf::Color(0, 255, 255));
+	ball.setOutlineThickness(5);
+	ball.setOutlineColor(sf::Color(143, 23, 194));
+	ball.setPosition(position);
+}
+
+void gracz::steruj()
+{
+	position = ball.getPosition();
+	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) && (position.y > 0))
+	{
+		ball.move(0, -0.2);
+	}
+	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) && (position.y < okno.y))
+	{
+		ball.move(0, 0.2);
+	}
+	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) && (position.x > 0))
+	{
+		ball.move(-0.2, 0);
+	}
+	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) && (position.x < okno.x))
+	{
+		ball.move(0.2, 0);
+	}
+}
+
+
 int main()
 {
 	int menu_selected_flag = 0;
 	sf::RenderWindow window(sf::VideoMode(800, 600), "SFML demo");
 	Menu menu(window.getSize().x, window.getSize().y);
+	float posx = (window.getSize().x) / 2;
+	float posy = (window.getSize().y) / 2;
+	gracz g1(posx, posy, &window);
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -123,12 +176,12 @@ int main()
 				if (event.key.code == sf::Keyboard::Enter && menu.getSelectedItem() == 1)
 				{
 					std::cout << "Najlepsze wyniki..." << std::endl;
-					menu_selected_flag = 1;
+					menu_selected_flag = 2;
 				}
 				if (event.key.code == sf::Keyboard::Enter && menu.getSelectedItem() == 2)
 				{
 					std::cout << "Koniec gry..." << std::endl;
-					menu_selected_flag = 1;
+					menu_selected_flag = 3;
 				}
 			}
 
@@ -138,6 +191,9 @@ int main()
 	window.clear();
 	if (menu_selected_flag == 0)
 		menu.draw(window);
+	if (menu_selected_flag == 1)
+		window.draw(g1.getGracz());
+	g1.steruj();
 
 	window.display();
 }
