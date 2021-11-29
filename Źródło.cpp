@@ -184,8 +184,7 @@ int main()
 					menu_selected_flag = 3;
 				}
 			}
-
-
+		
 		}
 
 	window.clear();
