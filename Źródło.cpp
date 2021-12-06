@@ -31,7 +31,7 @@ Menu::Menu(float width, float height)
 	menu[0].setPosition(sf::Vector2f(width / 3, height/ (MAX_LICZBA_POZIOMOW + 1) * 1));
 	menu[1].setFont(font);
 	menu[1].setFillColor(sf::Color::White);
-	menu[1].setString("Ostatnie wyniki");
+	menu[1].setString("Pomoc");
 	menu[1].setPosition(sf::Vector2f(width / 3, height / (MAX_LICZBA_POZIOMOW + 1) * 2));
 	menu[2].setFont(font);
 	menu[2].setFillColor(sf::Color::White);
@@ -147,6 +147,12 @@ int main()
 	float posx = (window.getSize().x) / 2;
 	float posy = (window.getSize().y) / 2;
 	gracz g1(posx, posy, &window);
+
+	sf::Texture pomoctex;
+	pomoctex.loadFromFile("pomoc.png");
+	sf::Sprite pomoc;
+	pomoc.setTexture(pomoctex);
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -175,15 +181,17 @@ int main()
 				}
 				if (event.key.code == sf::Keyboard::Enter && menu.getSelectedItem() == 1)
 				{
-					std::cout << "Najlepsze wyniki..." << std::endl;
+					std::cout << "Pomoc..." << std::endl;
 					menu_selected_flag = 2;
 				}
 				if (event.key.code == sf::Keyboard::Enter && menu.getSelectedItem() == 2)
 				{
 					std::cout << "Koniec gry..." << std::endl;
 					menu_selected_flag = 3;
+					window.close();
 				}
 			}
+		
 		
 		}
 
@@ -191,9 +199,15 @@ int main()
 	if (menu_selected_flag == 0)
 		menu.draw(window);
 	if (menu_selected_flag == 1)
+	{
 		window.draw(g1.getGracz());
-	g1.steruj();
-
+		g1.steruj();
+	}
+	if (menu_selected_flag == 2) {
+		window.draw(pomoc);
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+			menu_selected_flag = 0;
+	}
 	window.display();
 }
 	return 0;
