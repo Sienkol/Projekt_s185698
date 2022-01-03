@@ -89,6 +89,43 @@ void myDelay(int opoznienie)
 
 	}
 
+class wróg
+{
+private:
+	sf::Vector2f position;
+	sf::CircleShape ball;
+	int N;
+public:
+	wróg(float x, float y);
+	sf::CircleShape getWróg() { return ball; }
+	sf::FloatRect getWrógBounds() { return ball.getGlobalBounds(); }
+};
+
+wróg::wróg(float x, float y) {
+	position.x = x;
+	position.y = y;
+
+	ball.setRadius(40);
+	ball.setFillColor(sf::Color(255, 0, 0));
+	ball.setOutlineThickness(5);
+	ball.setOutlineColor(sf::Color(0, 30, 255));
+	ball.setPosition(position);
+}
+
+float randx()
+{
+	float a = rand() % 800;
+	return a;
+}
+float randy()
+{
+	float b = rand() % 600;
+	return b;
+}
+
+
+
+
 class gracz
 {
 private:
@@ -148,6 +185,14 @@ int main()
 	float posy = (window.getSize().y) / 2;
 	gracz g1(posx, posy, &window);
 
+	wróg p1(randx(), 0);
+	wróg p2(randx(), 0);
+	wróg p3(randx(), 0);
+	wróg p4(randx(), 0);
+	wróg p5(randx(), 0);
+	wróg p6(randx(), 0);
+	wróg p7(randx(), 0);
+
 	sf::Texture pomoctex;
 	pomoctex.loadFromFile("pomoc.png");
 	sf::Sprite pomoc;
@@ -202,6 +247,13 @@ int main()
 	{
 		window.draw(g1.getGracz());
 		g1.steruj();
+		window.draw(p1.getWróg());
+		window.draw(p2.getWróg());
+		window.draw(p3.getWróg());
+		window.draw(p4.getWróg());
+		window.draw(p5.getWróg());
+		window.draw(p6.getWróg());
+		window.draw(p7.getWróg());
 	}
 	if (menu_selected_flag == 2) {
 		window.draw(pomoc);
