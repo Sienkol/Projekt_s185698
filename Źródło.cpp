@@ -1,5 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <vector>
+#include <time.h>
 
 #define MAX_LICZBA_POZIOMOW 3
 
@@ -94,23 +96,33 @@ class wróg
 private:
 	sf::Vector2f position;
 	sf::CircleShape ball;
-	int N;
+	int maxW;
+	float SpawnTimer;
+	float SpawnTimerMax;
+	std::vector<sf::CircleShape> wrogowie;
+
 public:
 	wróg(float x, float y);
+	//~wróg();
 	sf::CircleShape getWróg() { return ball; }
 	sf::FloatRect getWrógBounds() { return ball.getGlobalBounds(); }
+	void draw(sf::RenderWindow& window);
+	void setPosition(float x, float y);
+
 };
 
 wróg::wróg(float x, float y) {
 	position.x = x;
 	position.y = y;
 
-	ball.setRadius(40);
-	ball.setFillColor(sf::Color(255, 0, 0));
-	ball.setOutlineThickness(5);
-	ball.setOutlineColor(sf::Color(0, 30, 255));
-	ball.setPosition(position);
+		ball.setRadius(10);
+		ball.setFillColor(sf::Color(255, 0, 0));
+		ball.setOutlineThickness(5);
+		ball.setOutlineColor(sf::Color(0, 30, 255));
+		ball.setPosition(position);
 }
+
+std::vector<wróg> wrogowie;
 
 float randx()
 {
@@ -123,8 +135,16 @@ float randy()
 	return b;
 }
 
+void wróg::draw(sf::RenderWindow& window) {
+	for (int i = 0; i < maxW; i++) {
+		window.draw(ball);
+	};
+}
 
-
+void wróg::setPosition(float x, float y) {
+	position.x = x;
+	position.y = y;
+}
 
 class gracz
 {
@@ -147,7 +167,7 @@ gracz::gracz(float x, float y, sf::RenderWindow* w)
 	okno.y = win->getSize().y;
 	position.x = x;
 	position.y = y;
-	ball.setRadius(30);
+	ball.setRadius(20);
 	ball.setFillColor(sf::Color(0, 255, 255));
 	ball.setOutlineThickness(5);
 	ball.setOutlineColor(sf::Color(143, 23, 194));
@@ -176,22 +196,44 @@ void gracz::steruj()
 }
 
 
+
+
+
 int main()
 {
 	int menu_selected_flag = 0;
 	sf::RenderWindow window(sf::VideoMode(800, 600), "SFML demo");
+	sf::Texture t;
+	t.setRepeated(true);
+	t.loadFromFile("bg.png");
+	sf::Sprite t³o;
+	t³o.setTextureRect(sf::IntRect(0, 0, 1000, 1000));
+	t³o.setTexture(t);
 	Menu menu(window.getSize().x, window.getSize().y);
 	float posx = (window.getSize().x) / 2;
 	float posy = (window.getSize().y) / 2;
 	gracz g1(posx, posy, &window);
-
-	wróg p1(randx(), 0);
-	wróg p2(randx(), 0);
-	wróg p3(randx(), 0);
-	wróg p4(randx(), 0);
-	wróg p5(randx(), 0);
-	wróg p6(randx(), 0);
-	wróg p7(randx(), 0);
+	int maxW = 7;
+	wróg p1(randx(), randy());
+	wróg p2(randx(), randy());
+	wróg p3(randx(), randy());
+	wróg p4(randx(), randy());
+	wróg p5(randx(), randy());
+	wróg p6(randx(), randy());
+	wróg p7(randx(), randy());
+	wróg p8(randx(), randy());
+	wróg p9(randx(), randy());
+	std::vector< wróg > wrogowie = {
+		p1,
+		p2,
+		p3,
+		p4,
+		p5,
+		p6,
+		p7
+	};
+	std::vector<wróg>::iterator it;
+	it = wrogowie.begin();
 
 	sf::Texture pomoctex;
 	pomoctex.loadFromFile("pomoc.png");
@@ -245,15 +287,34 @@ int main()
 		menu.draw(window);
 	if (menu_selected_flag == 1)
 	{
+		window.draw(t³o);
 		window.draw(g1.getGracz());
 		g1.steruj();
-		window.draw(p1.getWróg());
-		window.draw(p2.getWróg());
-		window.draw(p3.getWróg());
-		window.draw(p4.getWróg());
-		window.draw(p5.getWróg());
-		window.draw(p6.getWróg());
-		window.draw(p7.getWróg());
+		
+			for (auto& i : wrogowie) {
+				window.draw(i.getWróg());
+			}
+		
+		for (size_t i = 0; i < wrogowie.size(); i++) {
+			if (g1.getGraczBounds().intersects(wrogowie[i].getWrógBounds())) {
+				wrogowie.erase(wrogowie.begin() + i);
+			}
+		};
+		
+		if (wrogowie.size() < 7) {
+
+			wrogowie.push_back(p1);
+			wrogowie.push_back(p2);
+			wrogowie.push_back(p3);
+			wrogowie.push_back(p4);
+			wrogowie.push_back(p5);
+			wrogowie.push_back(p6);
+			wrogowie.push_back(p7);
+			for (auto& i : wrogowie) {
+				window.draw(i.getWróg());
+			}
+		}
+
 	}
 	if (menu_selected_flag == 2) {
 		window.draw(pomoc);
