@@ -2,8 +2,19 @@
 #include <iostream>
 #include <vector>
 #include <time.h>
+#include <ctime>
+#include <chrono>
+#include <thread>
 
 #define MAX_LICZBA_POZIOMOW 3
+
+
+sf::Clock zegar;
+float zegardt;
+
+void update() {
+	zegardt = zegar.getElapsedTime().asSeconds();
+}
 
 class Menu {
 
@@ -97,13 +108,9 @@ private:
 	sf::Vector2f position;
 	sf::CircleShape ball;
 	int maxW;
-	float SpawnTimer;
-	float SpawnTimerMax;
-	std::vector<sf::CircleShape> wrogowie;
 
 public:
 	wróg(float x, float y);
-	//~wróg();
 	sf::CircleShape getWróg() { return ball; }
 	sf::FloatRect getWrógBounds() { return ball.getGlobalBounds(); }
 	void draw(sf::RenderWindow& window);
@@ -122,7 +129,61 @@ wróg::wróg(float x, float y) {
 		ball.setPosition(position);
 }
 
-std::vector<wróg> wrogowie;
+class hp
+{
+private:
+	sf::Vector2f position;
+	sf::CircleShape ball;
+	int maxW;
+	sf::RectangleShape kwadrat;
+
+public:
+	hp(float x, float y);
+	sf::RectangleShape getHp() { return kwadrat; }
+	sf::FloatRect getHpBounds() { return kwadrat.getGlobalBounds(); }
+	void draw(sf::RenderWindow& window);
+	void setPosition(float x, float y);
+
+};
+
+hp::hp(float x, float y) {
+	position.x = x;
+	position.y = y;
+
+	kwadrat.setSize(sf::Vector2f(20, 20));
+	kwadrat.setFillColor(sf::Color(255, 0, 0));
+	kwadrat.setOutlineThickness(5);
+	kwadrat.setOutlineColor(sf::Color(0, 30, 255));
+	kwadrat.setPosition(position);
+}
+
+class zp
+{
+private:
+	sf::Vector2f position;
+	sf::CircleShape ball;
+	int maxW;
+
+
+public:
+	zp(float x, float y);
+	sf::RectangleShape getZp() { return kwadrat; }
+	sf::FloatRect getZpBounds() { return kwadrat.getGlobalBounds(); }
+	void draw(sf::RenderWindow& window);
+	void setPosition(float x, float y);
+	sf::RectangleShape kwadrat;
+};
+
+zp::zp(float x, float y) {
+	position.x = x;
+	position.y = y;
+
+	kwadrat.setSize(sf::Vector2f(20, 20));
+	kwadrat.setFillColor(sf::Color(255, 0, 0));
+	kwadrat.setOutlineThickness(5);
+	kwadrat.setOutlineColor(sf::Color(0, 30, 255));
+	kwadrat.setPosition(position);
+}
 
 float randx()
 {
@@ -150,59 +211,63 @@ class gracz
 {
 private:
 	sf::Vector2f position;
-	sf::CircleShape ball;
 	sf::RenderWindow* win;
 	sf::Vector2f okno;
+	sf::Texture tekstura;
+	sf::Sprite statek;
 public:
 	gracz(float x, float y, sf::RenderWindow* win);
 	void steruj();
-	sf::CircleShape getGracz() { return ball; }
-	sf::FloatRect getGraczBounds() { return ball.getGlobalBounds(); }
+	sf::Sprite getGracz() { return statek; }
+	sf::FloatRect getGraczBounds() { return statek.getGlobalBounds(); }
 };
 
 gracz::gracz(float x, float y, sf::RenderWindow* w)
 {
+	tekstura.loadFromFile("statek.png");
+	statek.setTexture(tekstura);
 	win = w;
 	okno.x = win->getSize().x;
 	okno.y = win->getSize().y;
 	position.x = x;
 	position.y = y;
-	ball.setRadius(20);
-	ball.setFillColor(sf::Color(0, 255, 255));
-	ball.setOutlineThickness(5);
-	ball.setOutlineColor(sf::Color(143, 23, 194));
-	ball.setPosition(position);
+	statek.setPosition(position);
+	statek.setOrigin(50, 50);
 }
 
 void gracz::steruj()
 {
-	position = ball.getPosition();
+	position = statek.getPosition();
 	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) && (position.y > 0))
 	{
-		ball.move(0, -0.2);
+		statek.move(0, -0.8);
+		statek.setRotation(0.f);
 	}
 	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) && (position.y < okno.y))
 	{
-		ball.move(0, 0.2);
+		statek.move(0, 0.8);
+		statek.setRotation(180.f);
 	}
 	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) && (position.x > 0))
 	{
-		ball.move(-0.2, 0);
+		statek.move(-0.8, 0);
+		statek.setRotation(270.f);
 	}
 	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) && (position.x < okno.x))
 	{
-		ball.move(0.2, 0);
+		statek.move(0.8, 0);
+		statek.setRotation(90.f);
 	}
 }
-
 
 
 
 
 int main()
 {
+	srand(time(NULL));
 	int menu_selected_flag = 0;
-	sf::RenderWindow window(sf::VideoMode(800, 600), "SFML demo");
+	sf::RenderWindow window(sf::VideoMode(800, 600), "Zjadanie Kolek w Kosmosie");
 	sf::Texture t;
 	t.setRepeated(true);
 	t.loadFromFile("bg.png");
@@ -213,27 +278,27 @@ int main()
 	float posx = (window.getSize().x) / 2;
 	float posy = (window.getSize().y) / 2;
 	gracz g1(posx, posy, &window);
-	int maxW = 7;
-	wróg p1(randx(), randy());
-	wróg p2(randx(), randy());
-	wróg p3(randx(), randy());
-	wróg p4(randx(), randy());
-	wróg p5(randx(), randy());
-	wróg p6(randx(), randy());
-	wróg p7(randx(), randy());
-	wróg p8(randx(), randy());
-	wróg p9(randx(), randy());
+	int maxW = 0;
+	int punkty = 0;
+	int zycie = 10;
+
 	std::vector< wróg > wrogowie = {
-		p1,
-		p2,
-		p3,
-		p4,
-		p5,
-		p6,
-		p7
+		wróg(randx(), randy()),
+		wróg(randx(), randy()),
+		wróg(randx(), randy()),
+		wróg(randx(), randy()),
+		wróg(randx(), randy()),
+		wróg(randx(), randy()),
+		wróg(randx(), randy()),
 	};
-	std::vector<wróg>::iterator it;
-	it = wrogowie.begin();
+
+	std::vector<hp> hp1 = {
+		hp(randx(), randy())
+	};
+
+	std::vector<zp> zp1 = {
+		zp(randx(), randy())
+	};
 
 	sf::Texture pomoctex;
 	pomoctex.loadFromFile("pomoc.png");
@@ -245,6 +310,7 @@ int main()
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
+
 			if (event.type == sf::Event::Closed)
 				window.close();
 			if (event.type == sf::Event::KeyPressed)
@@ -278,50 +344,170 @@ int main()
 					window.close();
 				}
 			}
-		
-		
+
+
 		}
 
-	window.clear();
-	if (menu_selected_flag == 0)
-		menu.draw(window);
-	if (menu_selected_flag == 1)
-	{
-		window.draw(t³o);
-		window.draw(g1.getGracz());
-		g1.steruj();
-		
+		window.clear();
+		if (menu_selected_flag == 0)
+			window.draw(t³o);
+			menu.draw(window);
+		if (menu_selected_flag == 1)
+		{
+
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::F1)) {
+				menu_selected_flag = 2;
+			}
+			window.draw(t³o);
+			window.draw(g1.getGracz());
+			g1.steruj();
+
 			for (auto& i : wrogowie) {
 				window.draw(i.getWróg());
 			}
-		
-		for (size_t i = 0; i < wrogowie.size(); i++) {
-			if (g1.getGraczBounds().intersects(wrogowie[i].getWrógBounds())) {
-				wrogowie.erase(wrogowie.begin() + i);
+			for (auto& i : hp1) {
+				window.draw(i.getHp());
 			}
-		};
-		
-		if (wrogowie.size() < 7) {
+			for (auto& i : zp1) {
+				window.draw(i.getZp());
+			}
 
-			wrogowie.push_back(p1);
-			wrogowie.push_back(p2);
-			wrogowie.push_back(p3);
-			wrogowie.push_back(p4);
-			wrogowie.push_back(p5);
-			wrogowie.push_back(p6);
-			wrogowie.push_back(p7);
-			for (auto& i : wrogowie) {
-				window.draw(i.getWróg());
+			for (size_t i = 0; i < wrogowie.size(); i++) {
+				if (g1.getGraczBounds().intersects(wrogowie[i].getWrógBounds())) {
+					wrogowie.erase(wrogowie.begin() + i);
+					punkty += 1.f;
+					std::cout << "Punkty:" << punkty << std::endl;
+
+
+				}
+			};
+
+			for (size_t i = 0; i < hp1.size(); i++) {
+				if (g1.getGraczBounds().intersects(hp1[i].getHpBounds())) {
+					hp1.erase(hp1.begin() + i);
+					zycie += 1.f;
+
+				}
+			};
+
+			for (size_t i = 0; i < zp1.size(); i++) {
+				if (g1.getGraczBounds().intersects(zp1[i].getZpBounds())) {
+					zp1.erase(zp1.begin() + i);
+					zycie -= 1.f;
+				}
+			};
+
+			if (hp1.size() < 1) {
+
+				hp1.push_back(hp(randx(), randy()));
+
+				for (auto& i : hp1) {
+					window.draw(i.getHp());
+				}
+			}
+
+			if (zp1.size() < 1) {
+
+				zp1.push_back(zp(randx(), randy()));
+
+				for (auto& i : zp1) {
+					window.draw(i.getZp());
+				}
+			}
+
+			if (wrogowie.size() < 7) {
+
+				wrogowie.push_back(wróg(randx(), randy()));
+				for (auto& i : wrogowie) {
+					window.draw(i.getWróg());
+				}
+			}
+
+			sf::Text text;
+			sf::Font font;
+			font.loadFromFile("arial.ttf");
+			text.setString("Punkty:");
+			text.setFont(font);
+			text.setFillColor(sf::Color::Red);
+			text.setPosition(sf::Vector2f(20, 20));
+			window.draw(text);
+			std::string myString = std::to_string(punkty);
+			sf::Text tekst;
+			tekst.setString(myString);
+			tekst.setFont(font);
+			tekst.setFillColor(sf::Color::Red);
+			tekst.setPosition(sf::Vector2f(120, 20));
+			window.draw(tekst);
+			sf::Text text2;
+			text2.setString("Zycie:");
+			text2.setFont(font);
+			text2.setFillColor(sf::Color::Green);
+			text2.setPosition(sf::Vector2f(670, 20));
+			window.draw(text2);
+			std::string myString1 = std::to_string(zycie);
+			tekst.setString(myString1);
+			tekst.setFont(font);
+			tekst.setFillColor(sf::Color::Green);
+			tekst.setPosition(sf::Vector2f(750, 20));
+			window.draw(tekst);
+
+			update();
+			if (zegardt >= 1.5) {
+				update();
+				zycie--;
+				zegar.restart();
+			}
+
+			if (zycie == 0) {
+				menu_selected_flag = 4;
+			};
+
+			
+		}
+
+		if (menu_selected_flag == 2) {
+			window.draw(pomoc);
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+				menu_selected_flag = 0;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::F2)) {
+				menu_selected_flag = 1;
 			}
 		}
 
+		if (menu_selected_flag == 4) {
+			window.draw(t³o);
+			sf::Text koniec;
+			sf::Font font;
+			font.loadFromFile("arial.ttf");
+			koniec.setString("Przegrales!!");
+			koniec.setFont(font);
+			koniec.setCharacterSize(50);
+			koniec.setFillColor(sf::Color::Red);
+			koniec.setPosition(sf::Vector2f(400, 0));
+
+			//std::string s;
+			//sf::Event event;
+			//while (window.pollEvent(event)) {
+			//	if (event.type == sf::Event::Closed)
+			//		window.close();
+			//	if (event.type == sf::Event::TextEntered) {
+			//		if (event.KeyPressed == sf::Keyboard::BackSpace && s.size() != 0) {
+			//			s.pop_back();
+			//			std::cout << s << std::endl;
+			//		}
+			//		else if (event.text.unicode < 128) {
+			//			s.push_back((char)event.text.unicode);
+			//			std::cout << s << std::endl;
+			//		}
+			//	}
+			//}
+
+			window.draw(koniec);
+		}
+		window.display();
 	}
-	if (menu_selected_flag == 2) {
-		window.draw(pomoc);
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-			menu_selected_flag = 0;
-	}
-	window.display();
-}
+	
 	return 0;
 }
+
